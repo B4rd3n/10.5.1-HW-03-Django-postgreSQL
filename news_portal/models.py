@@ -1,0 +1,73 @@
+from django.db import models
+from django.contrib.auth.models import User
+from django.db.models import Sum
+
+from .content_types import POSITIONS
+
+
+
+class Author(models.Model):
+    user = models.OneToOneField(User, on_delete = models.CASCADE)
+    rating = models.FloatField(default = 0)
+
+    def update_rating(self):
+        post_rating = Post.objects.filter(posted_by = self).aggregate(total = Sum('rating'))['total'] or 0
+        post_rating *= 3
+        authors_comments = Comment.objects.filter(commentator = self.user).aggregate(total = Sum('rating'))['total'] or 0
+        post_comments = Comment.objects.filter(post__posted_by = self).aggregate(total = Sum('rating'))['total'] or 0
+
+
+        self.rating = post_rating + authors_comments + post_comments
+        self.save()
+
+
+
+
+class Category(models.Model):
+    name = models.CharField(max_length = 255, unique = True)
+
+
+class Post(models.Model):
+    title = models.CharField(max_length = 255)
+    text = models.TextField()
+    rating = models.FloatField(default = 0)
+    content_type = models.CharField(max_length=2, choices=POSITIONS)
+    creation_time = models.DateTimeField(auto_now_add=True)
+    posted_by = models.ForeignKey("Author", on_delete = models.CASCADE)
+
+    post_category = models.ManyToManyField("Category", through = "PostCategory")
+
+    def like(self):
+        self.rating += 1
+        self.save()
+
+    def dislike(self):
+        self.rating -= 1
+        self.save()
+
+    def preview(self):
+        preview_text = self.text[:124] + "..." if len(self.text) > 124 else self.text
+        return preview_text
+
+
+class PostCategory(models.Model):
+    category = models.ForeignKey(Category, on_delete = models.CASCADE)
+    post = models.ForeignKey(Post, on_delete = models.CASCADE)
+
+
+class Comment(models.Model):
+    post = models.ForeignKey(Post, on_delete = models.CASCADE)
+    commentator = models.ForeignKey(User, on_delete = models.CASCADE)
+    text = models.TextField()
+    creation_time = models.DateTimeField(auto_now_add = True)
+    rating = models.FloatField(default = 0)
+
+    def like(self):
+        self.rating += 1
+        self.save()
+
+    def dislike(self):
+        self.rating -= 1
+        self.save()
+
+
