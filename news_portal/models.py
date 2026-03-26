@@ -49,6 +49,9 @@ class Post(models.Model):
         preview_text = self.text[:124] + "..." if len(self.text) > 124 else self.text
         return preview_text
 
+    def __str__(self):
+        return f'{self.title.title()}: {self.text}'
+
 
 class PostCategory(models.Model):
     category = models.ForeignKey(Category, on_delete = models.CASCADE)

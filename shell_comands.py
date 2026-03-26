@@ -126,4 +126,3 @@ for comm in all_comms:
     print(f"Рейтинг: {comm.rating}")
     print(f"Текст: {comm.text}")
     print()
-    
