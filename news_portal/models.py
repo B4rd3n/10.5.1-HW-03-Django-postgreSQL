@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Sum
+from django.urls import reverse
 
 from .content_types import POSITIONS
 
@@ -55,8 +56,12 @@ class Post(models.Model):
         preview_text = self.text[:124] + "..." if len(self.text) > 124 else self.text
         return preview_text
 
+    def get_absolute_url(self):
+        return reverse('news_detail', args=[str(self.id)])
+
     def __str__(self):
         return f'{self.title.title()}'
+
 
 
 class PostCategory(models.Model):

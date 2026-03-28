@@ -1,7 +1,6 @@
-from django.urls import reverse_lazy
-from django.views.generic import ListView
-from django.views.generic import DetailView
+from django.views.generic import ListView, DetailView, CreateView
 from .filters import PostFilter
+from .forms import PostForm
 
 from .models import Post
 
@@ -31,5 +30,17 @@ class NewsDetailView(DetailView):
     template_name = 'single_news.html'
     context_object_name = 'single_news'
 
+
 class SearchNews(NewsList):
     template_name = 'search_news.html'
+
+
+class CreateArticle(CreateView):
+    form_class = PostForm
+    model = Post
+    template_name = 'edit_article.html'
+
+    def form_valid(self, form):
+        article = form.save(commit=False)
+        article.content_type = 'AT'
+        return super().form_valid(form)
