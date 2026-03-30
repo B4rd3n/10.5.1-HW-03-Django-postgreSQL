@@ -1,4 +1,4 @@
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 from .filters import PostFilter
@@ -63,7 +63,7 @@ class CreateNews(CreateContent):
     type_of_content = 'NW'
 
 
-class UpdateContent(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+class UpdateContent(LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin, UpdateView):
     permission_required = ('news_portal.add_post',)
 
     form_class = PostForm
@@ -73,6 +73,10 @@ class UpdateContent(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
 
     def get_queryset(self):
         return Post.objects.filter(content_type = self.type_of_content)
+
+    def test_func(self):
+        post_obj = self.get_object()
+        return post_obj.posted_by.user == self.request.user
 
 
 class UpdateArticles(UpdateContent):
@@ -85,7 +89,7 @@ class UpdateNews(UpdateContent):
     type_of_content = 'NW'
 
 
-class DeleteContent(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+class DeleteContent(LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin, DeleteView):
     permission_required = ('news_portal.add_post',)
 
     model = Post
@@ -95,6 +99,10 @@ class DeleteContent(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
 
     def get_queryset(self):
         return Post.objects.filter(content_type = self.type_of_content)
+
+    def test_func(self):
+        post_obj = self.get_object()
+        return post_obj.posted_by.user == self.request.user
 
 
 class DeleteArticles(DeleteContent):
@@ -107,13 +115,17 @@ class DeleteNews(DeleteContent):
     type_of_content = 'NW'
 
 
-class BecomeAuthor(LoginRequiredMixin, TemplateView):
+class BecomeAuthor(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'become_author.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['is_not_author'] = not self.request.user.groups.filter(name='authors').exists()
         return context
+
+    def test_func(self):
+        is_author = self.request.user.groups.filter(name='authors').exists()
+        return not is_author
 
 
 
