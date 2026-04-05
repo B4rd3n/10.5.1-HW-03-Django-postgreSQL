@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+import ssl
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -143,11 +144,16 @@ SITE_ID = 1
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
 USE_TZ = True
+
+
+# Настройки Celery
+CELERY_TIMEZONE = "Europe/Moscow"
+CELERY_ENABLE_UTC = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -177,3 +183,10 @@ EMAIL_USE_SSL = True  # Яндекс использует ssl, подробне�
 
 APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
 APSCHEDULER_RUN_NOW_TIMEOUT = 25  # Seconds
+
+REDIS_PASS = os.getenv('REDIS_PASSWORD')
+CELERY_BROKER_URL = os.getenv('REDIS_URL')
+CELERY_RESULT_BACKEND = os.getenv('REDIS_URL')
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
