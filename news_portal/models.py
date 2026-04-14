@@ -22,6 +22,9 @@ class Author(models.Model):
         self.rating = post_rating + authors_comments + post_comments
         self.save()
 
+    def posts_amount(self):
+        return len(Post.objects.filter(posted_by = self))
+
     def __str__(self):
         return self.user.username
 
@@ -32,8 +35,16 @@ class Category(models.Model):
     name = models.CharField(max_length = 255, unique = True)
     sub = models.ManyToManyField(User, through="Subscriber", related_name="subscribed_categories")
 
+    def subs_amount(self):
+        return len(self.sub.all())
+
+    def posts_in_category(self):
+        return len(Post.objects.filter(post_category = self))
+
     def __str__(self):
         return self.name
+
+
 
 
 class Post(models.Model):

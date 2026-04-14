@@ -2,17 +2,36 @@ from django.contrib import admin
 from .models import Category, Post, PostCategory, Author
 
 
-# 1. Создаем Inline класс для связи
+
+
 class PostCategoryInline(admin.TabularInline):
     model = PostCategory
-    extra = 1  # Количество пустых строк для новых категорий
+    extra = 1
 
-# 2. Настраиваем админку поста
+
 class PostAdmin(admin.ModelAdmin):
-    # Убираем filter_horizontal, он тут не сработает
     inlines = [PostCategoryInline]
+    list_display = ('title', 'posted_by__user__username')
+    list_filter = ('post_category', 'posted_by__user__username')
+    search_fields = ('title', 'post_category__name')
 
-# 3. Регистрируем
+
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'subs_amount', 'posts_in_category')
+    list_filter = ('name', )
+    search_fields = ('name', )
+
+
+class AuthorAdmin(admin.ModelAdmin):
+    list_display = ('user__username', 'posts_amount', 'rating')
+    list_filter = ('user__username', )
+    search_fields = ('user__username', )
+
+
+
+
+
+
 admin.site.register(Post, PostAdmin)
-admin.site.register(Category)
-admin.site.register(Author)
+admin.site.register(Category, CategoryAdmin)
+admin.site.register(Author, AuthorAdmin)
