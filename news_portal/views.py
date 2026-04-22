@@ -1,13 +1,35 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
+from django.http import HttpResponse
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 from datetime import datetime
 from django.core.cache import cache
+import logging
 
 
 from .filters import PostFilter
 from .forms import PostForm, SubscribeForm
 from .models import Post, Author, Subscriber, Category
+
+# Тест логирования: Начало (http://127.0.0.1:8000/news/test-logs/)
+logger = logging.getLogger('django')
+security_logger = logging.getLogger('django.security')
+db_logger = logging.getLogger('django.db.backends')
+
+def test_logs(request):
+    logger.debug("Test DEBUG: Here is the message in terminal!")
+    logger.warning("Test WARNING: Path to file")
+
+    try:
+        1 / 0
+    except ZeroDivisionError:
+        logger.error("Test ERROR: Error stack!", exc_info=True)
+
+    security_logger.info("Test SECURITY: Security Alert!")
+    db_logger.error("Test DB: Database Alert!")
+
+    return HttpResponse("Logs sent!")
+# Тест логирования: Конец
 
 
 class NewsList(ListView):
@@ -16,8 +38,18 @@ class NewsList(ListView):
     template_name = 'news.html'
     context_object_name = 'news'
     paginate_by = 10
-
     filterset = None
+
+
+# Затестил создание своего слоя middleware.
+    def get_template_names(self):
+        if getattr(self.request, 'device_type', None) == 'mobile':
+            print('Mobile')
+        if getattr(self.request, 'device_type', None) == 'pc':
+            print('Computer')
+        else:
+            print('Other')
+        return [self.template_name]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

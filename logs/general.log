@@ -1,0 +1,7 @@
+2026-04-22 14:36:26,912 INFO autoreload Watching for file changes with StatReloader
+2026-04-22 14:36:28,725 WARNING views Test WARNING: Path to file
+2026-04-22 14:36:28,725 ERROR views Test ERROR: Error stack!
+Traceback (most recent call last):
+  File "D:\Downloads\PyProjects\Module_D_Project\EndNewsPaper\news_portal\views.py", line 24, in test_logs
+    1 / 0
+ZeroDivisionError: division by zero
